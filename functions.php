@@ -39,31 +39,37 @@
 			$description = $queried_object->description;
 		}
 		
-		if(!empty($url)) {
+		if(!defined( 'WPSEO_VERSION' )) {
+			if(!empty($url)) {
+				?>
+					<meta property="og:url" content="<?php echo($url); ?>" />
+				<?php
+			}
+			if(!empty($image)) {
+				?>
+					<meta property="og:image" content="<?php echo($image); ?>" />
+				<?php
+			}
+			if(!empty($title)) {
+				?>
+					<meta property="og:title" content="<?php echo(esc_attr($title)); ?>" />
+				<?php
+			}
+			if(!empty($description)) {
+				?>
+					<meta property="og:description" content="<?php echo(esc_attr($description)); ?>" />
+					<meta name="description" content="<?php echo(esc_attr($description)); ?>" />
+				<?php
+			}
 			?>
-				<meta property="og:url" content="<?php echo($url); ?>" />
+				<meta name="author" content="<?php bloginfo( 'name' ); ?>" />
 			<?php
 		}
-		if(!empty($image)) {
-			?>
-				<meta property="og:image" content="<?php echo($image); ?>" />
-			<?php
-		}
-		if(!empty($title)) {
-			?>
-				<meta property="og:title" content="<?php echo(esc_attr($title)); ?>" />
-			<?php
-		}
-		if(!empty($description)) {
-			?>
-				<meta property="og:description" content="<?php echo(esc_attr($description)); ?>" />
-				<meta name="description" content="<?php echo(esc_attr($description)); ?>" />
-			<?php
-		}
+		
 		?>
 			<meta property="og:type" content="website" />
 
-			<meta name="author" content="<?php bloginfo( 'name' ); ?>" />
+			
 			<meta name="viewport" content="initial-scale=1,user-scalable=yes" />
 			<meta name="HandheldFriendly" content="true" />
 			<meta name="viewport" content="width=device-width, minimal-ui" />
