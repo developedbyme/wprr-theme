@@ -18,28 +18,29 @@
 	add_action( 'after_setup_theme', 'wprr_theme_after_setup_theme' );
 	
 	function wprr_theme_wp_head() {
-		$image = null;
-		$title = null;
-		$description = null;
-		$url = null;
-		
-		if(is_singular()) {
-			if(has_post_thumbnail()) {
-				$image = wp_get_attachment_image_src(get_post_thumbnail_id(), 'full')[0];
-			}
-			$title = get_the_title();
-			$description = get_the_excerpt();
-			$url = get_permalink();
-		}
-		else if(is_archive()) {
-			
-			$queried_object = get_queried_object();
-			
-			$title = $queried_object->name;
-			$description = $queried_object->description;
-		}
 		
 		if(!defined( 'WPSEO_VERSION' )) {
+			$image = null;
+			$title = null;
+			$description = null;
+			$url = null;
+		
+			if(is_singular()) {
+				if(has_post_thumbnail()) {
+					$image = wp_get_attachment_image_src(get_post_thumbnail_id(), 'full')[0];
+				}
+				$title = get_the_title();
+				$description = get_the_excerpt();
+				$url = get_permalink();
+			}
+			else if(is_archive()) {
+			
+				$queried_object = get_queried_object();
+			
+				$title = $queried_object->name;
+				$description = $queried_object->description;
+			}
+			
 			if(!empty($url)) {
 				?>
 					<meta property="og:url" content="<?php echo($url); ?>" />
@@ -63,17 +64,69 @@
 			}
 			?>
 				<meta name="author" content="<?php bloginfo( 'name' ); ?>" />
+				<meta property="og:type" content="website" />
 			<?php
 		}
 		
 		?>
-			<meta property="og:type" content="website" />
+			
 
 			
 			<meta name="viewport" content="initial-scale=1,user-scalable=yes" />
 			<meta name="HandheldFriendly" content="true" />
 			<meta name="viewport" content="width=device-width, minimal-ui" />
 		<?php
+		
+		if(is_singular()) {
+			$has_dbm_content_translations = apply_filters('wprr_theme/has_dbm_translations', false);
+		
+			if($has_dbm_content_translations) {
+				$local_post = wprr_get_data_api()->wordpress()->get_post(get_the_id());
+				
+				$translated_posts = $local_post->object_relation_query('out:in:group/translation-group,in:in:*');
+				foreach($translated_posts as $translated_post) {
+					$language = $translated_post->get_meta('language');
+					if($language) {
+						echo("<link rel=\"alternate\" hreflang=\"".esc_attr($language)."\" href=\"".($translated_post->get_link())."\" />");
+					}
+				}
+			}
+		}
 	}
 	add_action( 'wp_head', 'wprr_theme_wp_head' );
+	
+	function wprr_theme_output_lang_attribute() {
+		
+		if(is_singular()) {
+			$has_dbm_content_translations = apply_filters('wprr_theme/has_dbm_translations', false);
+		
+			if($has_dbm_content_translations) {
+				$language = get_post_meta(get_the_id(), 'language', true);
+				if($language) {
+					echo("lang=\"".esc_attr($language)."\"");
+					return;
+				}
+			}
+		}
+		
+		language_attributes();
+	}
+	
+	function wprr_theme_filter_post_locale($locale) {
+		
+		if(is_singular()) {
+			$has_dbm_content_translations = apply_filters('wprr_theme/has_dbm_translations', false);
+	
+			if($has_dbm_content_translations) {
+				$language = get_post_meta(get_the_id(), 'language', true);
+				if($language) {
+					return $language;
+				}
+			}
+		}
+	
+		return $locale;
+	}
+	add_filter('wpseo_og_locale', 'wprr_theme_filter_post_locale', 1);
+	add_filter('wpseo_schema_piece_language', 'wprr_theme_filter_post_locale', 1);
 ?>
