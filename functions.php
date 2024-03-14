@@ -81,13 +81,15 @@
 			$has_dbm_content_translations = apply_filters('wprr_theme/has_dbm_translations', false);
 		
 			if($has_dbm_content_translations) {
-				$local_post = wprr_get_data_api()->wordpress()->get_post(get_the_id());
+				$current_id = get_the_id();
+				$local_post = wprr_get_data_api()->wordpress()->get_post($current_id);
 				
-				$translated_posts = $local_post->object_relation_query('out:in:group/translation-group,in:in:*');
+				$translated_posts = $local_post->object_relation_query('out:in:group/translations-group,in:in:*');
 				foreach($translated_posts as $translated_post) {
+					
 					$language = $translated_post->get_meta('language');
 					if($language) {
-						echo("<link rel=\"alternate\" hreflang=\"".esc_attr($language)."\" href=\"".($translated_post->get_link())."\" />");
+						echo("<link rel=\"alternate\" hreflang=\"".esc_attr($language)."\" href=\"".(site_url($translated_post->get_link()))."\" />");
 					}
 				}
 			}
